@@ -1,12 +1,12 @@
 import React, { CSSProperties } from 'react'
 import { Cell } from './Cell'
-import { Figure, Tetramino } from './Element'
+import { Figure } from './Element'
 
 type BoardProps = {
   rowNum: number
   colNum: number
   currentBoard: string[][]
-  shape: Tetramino
+  shape: string[][]
   figurePosX: number
   figurePosY: number
 }

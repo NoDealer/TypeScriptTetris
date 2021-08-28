@@ -1,4 +1,4 @@
-## Download the starter kit
+## Tetris Typescript React
 
 npx degit https://github.com/gopinav/React-TypeScript-Webpack-Starter my-app
 

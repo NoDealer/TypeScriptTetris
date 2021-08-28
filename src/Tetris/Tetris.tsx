@@ -1,11 +1,14 @@
 import React from 'react'
 import { Board } from './Board'
-import { FigureFactory, Tetramino } from './Element'
+import { ControlPanel } from './ControlPanel'
+import { StatePanel } from './StatePanel'
+import { FigureFactory } from './Element'
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 type TetrisProp = {}
 
 type TetrisState = {
-  shape: Tetramino
+  shape: string[][]
   posX: number
   posY: number
 }
@@ -28,7 +31,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   constructor(props: TetrisProp) {
     super(props)
     this.state = {
-      shape: FigureFactory.GetRandomTetramino(),
+      shape: [[]],
       posX: 4,
       posY: 0,
     }
@@ -36,11 +39,12 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
 
   board: string[][] = this.CreateDefaultBoard()
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   GameLoop(): void {}
 
   CanMoveInDirection(x: number, y: number): boolean {
     let movePossible = true
-    this.state.shape.Shape.map((row, i) => {
+    this.state.shape.map((row, i) => {
       row.map((col, j) => {
         //Detect border collision
         if (
@@ -53,7 +57,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
         //Detect block collision
         if (
-          this.state.shape.Shape[i][j] != 'white' &&
+          this.state.shape[i][j] != 'white' &&
           this.board[i + y + this.state.posY][j + x + this.state.posX] !=
             'white'
         ) {
@@ -72,15 +76,17 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   }
 
   Rotate() {
-    const shape = this.rotateLeft(this.state.shape.Shape)
-    this.setState({ shape: { Shape: [[]] } })
-    this.setState({ shape: { Shape: shape } })
+    const shape = this.rotateLeft(this.state.shape)
+    //Clear previous element
+    this.setState({ shape: [[]] })
+    //Draw it again
+    this.setState({ shape: shape })
   }
 
   rotateLeft(array: string[][]): string[][] {
     const result: string[][] = []
     array.forEach(function (a, i, aa) {
-      a.forEach(function (b, j, bb) {
+      a.forEach(function (b, j) {
         result[j] = result[j] || []
         result[j][aa.length - i - 1] = b
       })
@@ -90,6 +96,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
 
   componentDidMount() {
     document.addEventListener('keydown', this.keyPressHandle)
+    this.setState({ shape: FigureFactory.GetRandomTetramino() })
   }
 
   keyPressHandle = (event: KeyboardEvent) => {
@@ -130,14 +137,20 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
 
   render() {
     return (
-      <Board
-        figurePosX={this.state.posX}
-        figurePosY={this.state.posY}
-        shape={this.state.shape}
-        rowNum={this.rowNum}
-        colNum={this.colNum}
-        currentBoard={this.board}
-      />
+      <div>
+        <div id={'contolSide'} style={{ float: 'left' }}>
+          <ControlPanel />
+          <Board
+            figurePosX={this.state.posX}
+            figurePosY={this.state.posY}
+            shape={this.state.shape}
+            rowNum={this.rowNum}
+            colNum={this.colNum}
+            currentBoard={this.board}
+          />
+        </div>
+        <StatePanel />
+      </div>
     )
   }
 }
