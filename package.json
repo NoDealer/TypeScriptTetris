@@ -1,13 +1,16 @@
 {
   "name": "react-typescript-webpack-starter",
   "version": "1.0.0",
+  "homepage": "https://nodealer.github.io/TypeScriptTetris/",
   "description": "A starter template for React with Typescript using Webpack 5",
   "scripts": {
     "start": "webpack serve --config webpack/webpack.config.js --env env=dev",
     "build": "webpack --config webpack/webpack.config.js --env env=prod",
     "lint": "eslint --fix \"./src/**/*.{js,jsx,ts,tsx,json}\"",
     "format": "prettier --write \"./src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy":"npm run build",
+    "deploy": "gh-pages -d build"
   },
   "keywords": [
     "React",
@@ -19,6 +22,7 @@
   "author": "Vishwas",
   "license": "MIT",
   "dependencies": {
+    "gh-pages": "^3.2.3",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
