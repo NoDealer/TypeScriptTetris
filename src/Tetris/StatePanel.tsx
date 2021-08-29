@@ -1,10 +1,12 @@
 import React, { CSSProperties } from 'react'
-import { Figure } from './Element'
+import { Cell } from './Cell'
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 type StatePanelProps = {
   linesBurned: number
   score: number
+  levelCallback: (stage: number) => void
+  nextElem: string[][]
 }
 
 type StatePanelState = {
@@ -37,27 +39,53 @@ export class StatePanel extends React.Component<
     let newLevel = this.state.stage
     newLevel++
     if (newLevel > this.maxLevel) {
-      this.setState({ stage: this.maxLevel })
-    } else {
-      this.setState({ stage: newLevel })
+      newLevel = this.maxLevel
     }
+    this.setState({ stage: newLevel })
+    this.props.levelCallback(newLevel)
   }
 
   DecrementLevel = () => {
     let newLevel = this.state.stage
     newLevel--
     if (newLevel < this.minLevel) {
-      this.setState({ stage: this.minLevel })
+      newLevel = this.minLevel
+    }
+    this.setState({ stage: newLevel })
+    this.props.levelCallback(newLevel)
+  }
+
+  GetGridLines = (): number => {
+    if (typeof this.props.nextElem == 'undefined') {
+      return 0
     } else {
-      this.setState({ stage: newLevel })
+      return this.props.nextElem[0].length
     }
   }
 
   render() {
     return (
       <div style={this.StatePanelStyle}>
-        <div id={'nextElement'}>
-          <Figure />
+        <div
+          id={'nextElement'}
+          style={{
+            position: 'absolute',
+            display: 'grid',
+            margin: '0 auto',
+            width: '100%',
+            gridTemplateColumns: `repeat(${this.GetGridLines()},4vh)`,
+          }}
+        >
+          {typeof this.props.nextElem !== 'undefined' &&
+            this.props.nextElem.map((rows, i) =>
+              rows.map((col, j) => (
+                <Cell
+                  Color={this.props.nextElem[i][j]}
+                  key={`n${i}+${j}`}
+                  Zindex={1}
+                />
+              ))
+            )}
         </div>
         <div id={'stage elements'} style={{ position: 'relative' }}>
           <h2

@@ -10,14 +10,17 @@ type TetrisProp = {}
 type TetrisState = {
   board: string[][]
   currentElement: string[][]
+  nextElement: string[][]
   elementPosX: number
   elementPosY: number
-  gameStarted: boolean
+  firstMoveSpawn: boolean
   gamePaused: boolean
   gameOver: boolean
   newTetramino: boolean
   linesBurned: number
   score: number
+  level: number
+  prevousLevelUp: number
 }
 
 export class Tetris extends React.Component<TetrisProp, TetrisState> {
@@ -39,46 +42,75 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     super(props)
     this.state = {
       currentElement: [[]],
+      nextElement: [[]],
       elementPosX: 4,
       elementPosY: 0,
       board: this.CreateDefaultBoard(),
-      gameStarted: false,
+      firstMoveSpawn: true,
       gameOver: false,
       gamePaused: false,
       newTetramino: true,
       score: 0,
       linesBurned: 0,
+      level: 1,
+      prevousLevelUp: 0,
     }
   }
 
-  GameLoop = () => {
+  GameLoop = (): void => {
+    const nextExecTime = this.GetTimeStep()
     const fallX = 0
     const fallY = 1
-    const timedEnd = setInterval(() => {
-      if (!this.state.gamePaused) {
-        if (this.state.newTetramino) {
-          this.setState({
-            currentElement: FigureFactory.GetRandomTetramino(),
-            newTetramino: false,
-          })
-        }
-        if (this.CanMoveInDirection(fallX, fallY)) {
-          this.MoveInDirection(fallX, fallY)
-        } else {
-          this.FixTetramino()
-          this.ClearFullRows()
-          this.setState({
-            newTetramino: true,
-            elementPosX: this.startingX,
-            elementPosY: this.startingY,
-          })
-          this.CheckIfGameIsOver()
-        }
-        if (this.state.gameOver) {
-          clearInterval(timedEnd)
-        }
+    if (!this.state.gamePaused) {
+      if (this.state.firstMoveSpawn) {
+        this.setState({
+          currentElement: FigureFactory.GetRandomTetramino(),
+          nextElement: FigureFactory.GetRandomTetramino(),
+          newTetramino: false,
+          firstMoveSpawn: false,
+        })
+      } else if (this.state.newTetramino) {
+        this.setState({
+          currentElement: this.state.nextElement,
+          nextElement: FigureFactory.GetRandomTetramino(),
+          newTetramino: false,
+        })
       }
-    }, 250)
+      if (this.CanMoveInDirection(fallX, fallY)) {
+        this.MoveInDirection(fallX, fallY)
+      } else {
+        this.FixTetramino()
+        this.ClearFullRows()
+        if (
+          this.state.linesBurned - this.state.prevousLevelUp > 10 &&
+          this.state.level != 10
+        ) {
+          const newLevel = this.state.level + 1
+          this.setState({
+            prevousLevelUp: this.state.linesBurned,
+            level: newLevel,
+          })
+        }
+        this.setState({
+          newTetramino: true,
+          elementPosX: this.startingX,
+          elementPosY: this.startingY,
+        })
+        this.CheckIfGameIsOver()
+      }
+      if (this.state.gameOver) {
+        this.setState({
+          newTetramino: true,
+          elementPosX: this.startingX,
+          elementPosY: this.startingY,
+          board: this.CreateDefaultBoard(),
+          firstMoveSpawn: false,
+          currentElement: [[]],
+        })
+        return
+      }
+    }
+    setTimeout(this.GameLoop, nextExecTime)
   }
 
   CanMoveInDirection(x: number, y: number): boolean {
@@ -109,6 +141,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
       }
     return true
+  }
+
+  GetTimeStep = (): number => {
+    return 600 - 40 * this.state.level
   }
 
   MoveInDirection(x: number, y: number): void {
@@ -233,7 +269,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   ResetGame = () => {
     this.setState({
       board: this.CreateDefaultBoard(),
-      gameStarted: false,
+      firstMoveSpawn: false,
       currentElement: [[]],
     })
   }
@@ -258,7 +294,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
       newBoard.unshift(new Array(10).fill('white'))
     })
     newLinesCount += indexes.length
-    newScore += indexes.length * 10
+    newScore += indexes.length * indexes.length * 10
     this.setState({
       board: newBoard,
       linesBurned: newLinesCount,
@@ -270,7 +306,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     if (this.state.board[0].some((cell) => cell !== 'white')) {
       this.setState({ gameOver: true })
     }
-    console.log('game over:' + this.state.gameOver)
+  }
+
+  GetLevelFromStatePanel = (stage: number): void => {
+    this.setState({ level: stage })
   }
 
   render() {
@@ -292,8 +331,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           />
         </div>
         <StatePanel
+          nextElem={this.state.nextElement}
           score={this.state.score}
           linesBurned={this.state.linesBurned}
+          levelCallback={this.GetLevelFromStatePanel}
         />
       </div>
     )
