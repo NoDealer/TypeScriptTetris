@@ -16,6 +16,8 @@ type TetrisState = {
   gamePaused: boolean
   gameOver: boolean
   newTetramino: boolean
+  linesBurned: number
+  score: number
 }
 
 export class Tetris extends React.Component<TetrisProp, TetrisState> {
@@ -44,6 +46,8 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
       gameOver: false,
       gamePaused: false,
       newTetramino: true,
+      score: 0,
+      linesBurned: 0,
     }
   }
 
@@ -68,6 +72,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             elementPosX: this.startingX,
             elementPosY: this.startingY,
           })
+          this.CheckIfGameIsOver()
         }
         if (this.state.gameOver) {
           clearInterval(timedEnd)
@@ -91,7 +96,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           j + x + this.state.elementPosX < 0 ||
           j + x + this.state.elementPosX >= this.colNum
         ) {
-          console.log('cant move in dir ' + x + y)
           return false
         }
         //detect field collision
@@ -104,7 +108,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           return false
         }
       }
-    console.log('can move in dir ' + x + y)
     return true
   }
 
@@ -122,6 +125,37 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     this.setState({ currentElement: [[]] })
     //Draw it again
     this.setState({ currentElement: shape })
+  }
+
+  CanRotate(): boolean {
+    if (
+      typeof this.state.currentElement == 'undefined' ||
+      this.state.currentElement.length == 0
+    )
+      return false
+    const rotatedElement = this.RotateClockwise(this.state.currentElement)
+    for (let i = 0; i < rotatedElement.length; i++)
+      for (let j = 0; j < rotatedElement[i].length; j++) {
+        //detect border collision
+        if (
+          i + this.state.elementPosY < 0 ||
+          i + this.state.elementPosY >= this.rowNum ||
+          j + this.state.elementPosX < 0 ||
+          j + this.state.elementPosX >= this.colNum
+        ) {
+          return false
+        }
+        //detect field collision
+        if (
+          rotatedElement[i][j] != 'white' &&
+          this.state.board[i + this.state.elementPosY][
+            j + this.state.elementPosX
+          ] != 'white'
+        ) {
+          return false
+        }
+      }
+    return true
   }
 
   RotateClockwise(array: string[][]): string[][] {
@@ -177,7 +211,9 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
         break
       case arrowUp:
-        this.Rotate()
+        if (this.CanRotate()) {
+          this.Rotate()
+        }
         break
       case arrowDown:
         if (this.CanMoveInDirection(0, step)) {
@@ -192,16 +228,21 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
 
   Pause = () => {
     this.setState({ gamePaused: !this.state.gamePaused })
-    console.log('set game pause?' + this.state.gamePaused)
   }
 
   ResetGame = () => {
-    this.setState({ board: this.CreateDefaultBoard(), gameOver: true })
+    this.setState({
+      board: this.CreateDefaultBoard(),
+      gameStarted: false,
+      currentElement: [[]],
+    })
   }
 
   ClearFullRows = () => {
     const newBoard = this.state.board
     const indexes: number[] = []
+    let newLinesCount = this.state.linesBurned
+    let newScore = this.state.score
 
     newBoard.map((rows, i) => {
       if (rows.every((elem) => elem !== 'white')) {
@@ -216,7 +257,20 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     indexes.forEach(() => {
       newBoard.unshift(new Array(10).fill('white'))
     })
-    this.setState({ board: newBoard })
+    newLinesCount += indexes.length
+    newScore += indexes.length * 10
+    this.setState({
+      board: newBoard,
+      linesBurned: newLinesCount,
+      score: newScore,
+    })
+  }
+
+  CheckIfGameIsOver = () => {
+    if (this.state.board[0].some((cell) => cell !== 'white')) {
+      this.setState({ gameOver: true })
+    }
+    console.log('game over:' + this.state.gameOver)
   }
 
   render() {
@@ -237,7 +291,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             colNum={this.colNum}
           />
         </div>
-        <StatePanel />
+        <StatePanel
+          score={this.state.score}
+          linesBurned={this.state.linesBurned}
+        />
       </div>
     )
   }
