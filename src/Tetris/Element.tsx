@@ -7,16 +7,6 @@ type ElementProps = {
   shape: string[][]
 }
 
-export type Tetramino = {
-  Shape: string[][]
-}
-
-export type Element = {
-  posX: number
-  posY: number
-  shape: string[][]
-}
-
 //All tetramino variants
 export const Shapes: string[][][] = [
   [
@@ -67,15 +57,24 @@ export class Figure extends React.Component<ElementProps> {
           left: `${4 * this.props.boardPosX}vh`,
           top: `${4 * this.props.boardPosY}vh`,
           display: 'grid',
-          gridTemplateColumns: `repeat(${this.props.shape[0].length},4vh)`,
+          gridTemplateColumns: `repeat(${
+            typeof this.props.shape == 'undefined'
+              ? 0
+              : this.props.shape[0].length
+          },4vh)`,
         }}
         className={'tetramino'}
       >
-        {this.props.shape.map((rows, i) =>
-          rows.map((col, j) => (
-            <Cell Color={this.props.shape[i][j]} key={`f${i}+${j}`} />
-          ))
-        )}
+        {typeof this.props.shape !== 'undefined' &&
+          this.props.shape.map((rows, i) =>
+            rows.map((col, j) => (
+              <Cell
+                Color={this.props.shape[i][j]}
+                key={`f${i}+${j}`}
+                Zindex={this.props.shape[i][j] === 'white' ? 0 : 1}
+              />
+            ))
+          )}
       </div>
     )
   }

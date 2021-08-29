@@ -8,9 +8,14 @@ import { FigureFactory } from './Element'
 type TetrisProp = {}
 
 type TetrisState = {
-  shape: string[][]
-  posX: number
-  posY: number
+  board: string[][]
+  currentElement: string[][]
+  elementPosX: number
+  elementPosY: number
+  gameStarted: boolean
+  gamePaused: boolean
+  gameOver: boolean
+  newTetramino: boolean
 }
 
 export class Tetris extends React.Component<TetrisProp, TetrisState> {
@@ -31,59 +36,95 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   constructor(props: TetrisProp) {
     super(props)
     this.state = {
-      shape: [[]],
-      posX: 4,
-      posY: 0,
+      currentElement: [[]],
+      elementPosX: 4,
+      elementPosY: 0,
+      board: this.CreateDefaultBoard(),
+      gameStarted: false,
+      gameOver: false,
+      gamePaused: false,
+      newTetramino: true,
     }
   }
 
-  board: string[][] = this.CreateDefaultBoard()
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  GameLoop(): void {}
+  GameLoop = () => {
+    const fallX = 0
+    const fallY = 1
+    const timedEnd = setInterval(() => {
+      if (!this.state.gamePaused) {
+        if (this.state.newTetramino) {
+          this.setState({
+            currentElement: FigureFactory.GetRandomTetramino(),
+            newTetramino: false,
+          })
+        }
+        if (this.CanMoveInDirection(fallX, fallY)) {
+          this.MoveInDirection(fallX, fallY)
+        } else {
+          this.FixTetramino()
+          this.ClearFullRows()
+          this.setState({
+            newTetramino: true,
+            elementPosX: this.startingX,
+            elementPosY: this.startingY,
+          })
+        }
+        if (this.state.gameOver) {
+          clearInterval(timedEnd)
+        }
+      }
+    }, 250)
+  }
 
   CanMoveInDirection(x: number, y: number): boolean {
-    let movePossible = true
-    this.state.shape.map((row, i) => {
-      row.map((col, j) => {
-        //Detect border collision
+    if (
+      typeof this.state.currentElement == 'undefined' ||
+      this.state.currentElement.length == 0
+    )
+      return false
+    for (let i = 0; i < this.state.currentElement.length; i++)
+      for (let j = 0; j < this.state.currentElement[i].length; j++) {
+        //detect border collision
         if (
-          y + i + this.state.posY < 0 ||
-          y + i + this.state.posY >= this.rowNum ||
-          x + j + this.state.posX < 0 ||
-          x + j + this.state.posX >= this.colNum
+          i + y + this.state.elementPosY < 0 ||
+          i + y + this.state.elementPosY >= this.rowNum ||
+          j + x + this.state.elementPosX < 0 ||
+          j + x + this.state.elementPosX >= this.colNum
         ) {
-          movePossible = false
+          console.log('cant move in dir ' + x + y)
+          return false
         }
-        //Detect block collision
+        //detect field collision
         if (
-          this.state.shape[i][j] != 'white' &&
-          this.board[i + y + this.state.posY][j + x + this.state.posX] !=
-            'white'
+          this.state.currentElement[i][j] != 'white' &&
+          this.state.board[i + y + this.state.elementPosY][
+            j + x + this.state.elementPosX
+          ] != 'white'
         ) {
-          movePossible = false
+          return false
         }
-      })
-    })
-    return movePossible
+      }
+    console.log('can move in dir ' + x + y)
+    return true
   }
 
   MoveInDirection(x: number, y: number): void {
-    const newX = this.state.posX + x
-    const newY = this.state.posY + y
-    this.setState({ posX: newX })
-    this.setState({ posY: newY })
+    if (this.state.currentElement.length == 0) return
+    const newX = this.state.elementPosX + x
+    const newY = this.state.elementPosY + y
+    this.setState({ elementPosX: newX })
+    this.setState({ elementPosY: newY })
   }
 
   Rotate() {
-    const shape = this.rotateLeft(this.state.shape)
+    const shape = this.RotateClockwise(this.state.currentElement)
     //Clear previous element
-    this.setState({ shape: [[]] })
+    this.setState({ currentElement: [[]] })
     //Draw it again
-    this.setState({ shape: shape })
+    this.setState({ currentElement: shape })
   }
 
-  rotateLeft(array: string[][]): string[][] {
+  RotateClockwise(array: string[][]): string[][] {
     const result: string[][] = []
     array.forEach(function (a, i, aa) {
       a.forEach(function (b, j) {
@@ -94,9 +135,23 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     return result
   }
 
+  FixTetramino = () => {
+    if (typeof this.state.currentElement == 'undefined') return
+    const newBoard = this.state.board.map(function (arr) {
+      return arr.slice()
+    })
+    for (let i = 0; i < this.state.currentElement.length; i++)
+      for (let j = 0; j < this.state.currentElement[i].length; j++) {
+        if (this.state.currentElement[i][j] != 'white') {
+          newBoard[i + this.state.elementPosY][j + this.state.elementPosX] =
+            this.state.currentElement[i][j]
+        }
+      }
+    this.setState({ board: newBoard, currentElement: [[]] })
+  }
+
   componentDidMount() {
     document.addEventListener('keydown', this.keyPressHandle)
-    this.setState({ shape: FigureFactory.GetRandomTetramino() })
   }
 
   keyPressHandle = (event: KeyboardEvent) => {
@@ -130,23 +185,56 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
         break
       default:
-        console.log('buttonPressed')
+        console.log('non effect buttonPressed')
         break
     }
+  }
+
+  Pause = () => {
+    this.setState({ gamePaused: !this.state.gamePaused })
+    console.log('set game pause?' + this.state.gamePaused)
+  }
+
+  ResetGame = () => {
+    this.setState({ board: this.CreateDefaultBoard(), gameOver: true })
+  }
+
+  ClearFullRows = () => {
+    const newBoard = this.state.board
+    const indexes: number[] = []
+
+    newBoard.map((rows, i) => {
+      if (rows.every((elem) => elem !== 'white')) {
+        indexes.push(i)
+      }
+    })
+
+    for (let i = indexes.length - 1; i >= 0; i--) {
+      newBoard.splice(indexes[i], 1)
+    }
+
+    indexes.forEach(() => {
+      newBoard.unshift(new Array(10).fill('white'))
+    })
+    this.setState({ board: newBoard })
   }
 
   render() {
     return (
       <div>
         <div id={'contolSide'} style={{ float: 'left' }}>
-          <ControlPanel />
+          <ControlPanel
+            StartGameFunc={this.GameLoop}
+            PauseGameFunc={this.Pause}
+            ResetGameFunc={this.ResetGame}
+          />
           <Board
-            figurePosX={this.state.posX}
-            figurePosY={this.state.posY}
-            shape={this.state.shape}
+            currentBoard={this.state.board}
+            figurePosX={this.state.elementPosX}
+            figurePosY={this.state.elementPosY}
+            shape={this.state.currentElement}
             rowNum={this.rowNum}
             colNum={this.colNum}
-            currentBoard={this.board}
           />
         </div>
         <StatePanel />
