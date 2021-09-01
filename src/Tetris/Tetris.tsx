@@ -4,8 +4,10 @@ import { ControlPanel } from './ControlPanel'
 import { StatePanel } from './StatePanel'
 import { FigureFactory } from './Element'
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-type TetrisProp = {}
+type TetrisProp = {
+  cols: number
+  rows: number
+}
 
 type TetrisState = {
   board: string[][]
@@ -24,16 +26,13 @@ type TetrisState = {
 }
 
 export class Tetris extends React.Component<TetrisProp, TetrisState> {
-  colNum = 10
-  rowNum = 20
-
   startingX = 4
   startingY = 0
 
   CreateDefaultBoard(): string[][] {
     const rows: string[][] = []
-    for (let i = 0; i < this.rowNum; i++) {
-      rows.push(Array.from(Array(this.colNum), () => 'white'))
+    for (let i = 0; i < this.props.rows; i++) {
+      rows.push(Array.from(Array(this.props.cols), () => 'white'))
     }
     return rows
   }
@@ -76,7 +75,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           newTetramino: false,
         })
       }
-      if (this.CanMoveInDirection(fallX, fallY)) {
+      if (this.IsLocationPossible(this.state.currentElement, fallX, fallY)) {
         this.MoveInDirection(fallX, fallY)
       } else {
         this.FixTetramino()
@@ -113,26 +112,22 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     setTimeout(this.GameLoop, nextExecTime)
   }
 
-  CanMoveInDirection(x: number, y: number): boolean {
-    if (
-      typeof this.state.currentElement == 'undefined' ||
-      this.state.currentElement.length == 0
-    )
-      return false
-    for (let i = 0; i < this.state.currentElement.length; i++)
-      for (let j = 0; j < this.state.currentElement[i].length; j++) {
+  IsLocationPossible(element: string[][], x: number, y: number): boolean {
+    if (typeof element == 'undefined' || element.length == 0) return false
+    for (let i = 0; i < element.length; i++)
+      for (let j = 0; j < element[i].length; j++) {
         //detect border collision
         if (
           i + y + this.state.elementPosY < 0 ||
-          i + y + this.state.elementPosY >= this.rowNum ||
+          i + y + this.state.elementPosY >= this.props.rows ||
           j + x + this.state.elementPosX < 0 ||
-          j + x + this.state.elementPosX >= this.colNum
+          j + x + this.state.elementPosX >= this.props.cols
         ) {
           return false
         }
         //detect field collision
         if (
-          this.state.currentElement[i][j] != 'white' &&
+          element[i][j] != 'white' &&
           this.state.board[i + y + this.state.elementPosY][
             j + x + this.state.elementPosX
           ] != 'white'
@@ -163,37 +158,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     this.setState({ currentElement: shape })
   }
 
-  CanRotate(): boolean {
-    if (
-      typeof this.state.currentElement == 'undefined' ||
-      this.state.currentElement.length == 0
-    )
-      return false
-    const rotatedElement = this.RotateClockwise(this.state.currentElement)
-    for (let i = 0; i < rotatedElement.length; i++)
-      for (let j = 0; j < rotatedElement[i].length; j++) {
-        //detect border collision
-        if (
-          i + this.state.elementPosY < 0 ||
-          i + this.state.elementPosY >= this.rowNum ||
-          j + this.state.elementPosX < 0 ||
-          j + this.state.elementPosX >= this.colNum
-        ) {
-          return false
-        }
-        //detect field collision
-        if (
-          rotatedElement[i][j] != 'white' &&
-          this.state.board[i + this.state.elementPosY][
-            j + this.state.elementPosX
-          ] != 'white'
-        ) {
-          return false
-        }
-      }
-    return true
-  }
-
   RotateClockwise(array: string[][]): string[][] {
     const result: string[][] = []
     array.forEach(function (a, i, aa) {
@@ -213,8 +177,9 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     for (let i = 0; i < this.state.currentElement.length; i++)
       for (let j = 0; j < this.state.currentElement[i].length; j++) {
         if (this.state.currentElement[i][j] != 'white') {
-          newBoard[i + this.state.elementPosY][j + this.state.elementPosX] =
-            this.state.currentElement[i][j]
+          newBoard[i + this.state.elementPosY][
+            j + this.state.elementPosX
+          ] = this.state.currentElement[i][j]
         }
       }
     this.setState({ board: newBoard, currentElement: [[]] })
@@ -237,22 +202,28 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
 
     switch (event.keyCode) {
       case arrowLeft:
-        if (this.CanMoveInDirection(-step, 0)) {
+        if (this.IsLocationPossible(this.state.currentElement, -step, 0)) {
           this.MoveInDirection(-step, 0)
         }
         break
       case arrowRight:
-        if (this.CanMoveInDirection(step, 0)) {
+        if (this.IsLocationPossible(this.state.currentElement, step, 0)) {
           this.MoveInDirection(step, 0)
         }
         break
       case arrowUp:
-        if (this.CanRotate()) {
+        if (
+          this.IsLocationPossible(
+            this.RotateClockwise(this.state.currentElement),
+            0,
+            0
+          )
+        ) {
           this.Rotate()
         }
         break
       case arrowDown:
-        if (this.CanMoveInDirection(0, step)) {
+        if (this.IsLocationPossible(this.state.currentElement, 0, step)) {
           this.MoveInDirection(0, step)
         }
         break
@@ -326,8 +297,8 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             figurePosX={this.state.elementPosX}
             figurePosY={this.state.elementPosY}
             shape={this.state.currentElement}
-            rowNum={this.rowNum}
-            colNum={this.colNum}
+            rowNum={this.props.rows}
+            colNum={this.props.cols}
           />
         </div>
         <StatePanel

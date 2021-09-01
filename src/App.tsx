@@ -3,7 +3,7 @@ import { Tetris } from './Tetris/Tetris'
 export const App = () => {
   return (
     <>
-      <Tetris />
+      <Tetris cols={10} rows={20} />
     </>
   )
 }

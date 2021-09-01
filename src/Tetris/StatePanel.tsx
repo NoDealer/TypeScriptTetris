@@ -1,7 +1,6 @@
 import React, { CSSProperties } from 'react'
 import { Cell } from './Cell'
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 type StatePanelProps = {
   linesBurned: number
   score: number
