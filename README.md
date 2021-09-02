@@ -1,6 +1,6 @@
 ## Tetris Typescript React
 
-npx degit https://github.com/gopinav/React-TypeScript-Webpack-Starter my-app
+Hosted at https://type-script-tetris.vercel.app/
 
 ## Install dependencies
 
