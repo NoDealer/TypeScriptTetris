@@ -82,6 +82,6 @@ export class Figure extends React.Component<ElementProps> {
 
 export class FigureFactory {
   static GetRandomTetramino(): string[][] {
-    return Shapes[Math.floor(Math.random() * (Shapes.length + 1))]
+    return Shapes[Math.floor(Math.random() * Shapes.length)]
   }
 }

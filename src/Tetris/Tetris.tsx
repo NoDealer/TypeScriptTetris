@@ -29,6 +29,8 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   startingX = 4
   startingY = 0
 
+  static scalingFactor = 4
+
   CreateDefaultBoard(): string[][] {
     const rows: string[][] = []
     for (let i = 0; i < this.props.rows; i++) {
@@ -143,7 +145,11 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   }
 
   MoveInDirection(x: number, y: number): void {
-    if (this.state.currentElement.length == 0) return
+    if (
+      typeof this.state.currentElement == 'undefined' ||
+      this.state.currentElement.length == 0
+    )
+      return
     const newX = this.state.elementPosX + x
     const newY = this.state.elementPosY + y
     this.setState({ elementPosX: newX })
@@ -153,7 +159,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   Rotate() {
     const shape = this.RotateClockwise(this.state.currentElement)
     //Clear previous element
-    this.setState({ currentElement: [[]] })
+    //this.setState({ currentElement: [[]] })
     //Draw it again
     this.setState({ currentElement: shape })
   }
@@ -170,7 +176,11 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   }
 
   FixTetramino = () => {
-    if (typeof this.state.currentElement == 'undefined') return
+    if (
+      typeof this.state.currentElement === 'undefined' ||
+      this.state.currentElement.length == 0
+    )
+      return
     const newBoard = this.state.board.map(function (arr) {
       return arr.slice()
     })
@@ -223,7 +233,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
         break
       case arrowDown:
-        if (this.IsLocationPossible(this.state.currentElement, 0, step)) {
+        if (
+          this.IsLocationPossible(this.state.currentElement, 0, step) &&
+          this.state.elementPosY !== this.startingY
+        ) {
           this.MoveInDirection(0, step)
         }
         break
@@ -250,7 +263,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     const indexes: number[] = []
     let newLinesCount = this.state.linesBurned
     let newScore = this.state.score
-
     newBoard.map((rows, i) => {
       if (rows.every((elem) => elem !== 'white')) {
         indexes.push(i)
@@ -299,6 +311,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             shape={this.state.currentElement}
             rowNum={this.props.rows}
             colNum={this.props.cols}
+            gameOver={this.state.gameOver}
           />
         </div>
         <StatePanel

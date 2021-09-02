@@ -19,6 +19,7 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:eslint-comments/recommended',
     'prettier/@typescript-eslint',
+    'prettier',
     'plugin:prettier/recommended',
   ],
   rules: {

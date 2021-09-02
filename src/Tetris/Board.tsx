@@ -1,6 +1,7 @@
-import React, { CSSProperties } from 'react'
+import React from 'react'
 import { Cell } from './Cell'
 import { Figure } from './Element'
+import { Tetris } from './Tetris'
 
 type BoardProps = {
   rowNum: number
@@ -9,28 +10,21 @@ type BoardProps = {
   shape: string[][]
   figurePosX: number
   figurePosY: number
+  gameOver: boolean
 }
 
 export class Board extends React.Component<BoardProps> {
-  BoardStyle: CSSProperties = {
-    border: 'solid',
-    width: '40vh',
-    height: '80vh',
-    display: 'grid',
-    gridTemplateColumns: `repeat(${this.props.colNum},4vh)`,
-  }
-
   render() {
     return (
       <div
         id="board"
         style={{
           border: 'solid',
-          width: '40vh',
-          height: '80vh',
+          width: `${Tetris.scalingFactor * this.props.colNum}vh`,
+          height: `${Tetris.scalingFactor * this.props.rowNum}vh`,
           display: 'grid',
           position: 'relative',
-          gridTemplateColumns: `repeat(${this.props.colNum},4vh)`,
+          gridTemplateColumns: `repeat(${this.props.colNum},${Tetris.scalingFactor}vh)`,
         }}
       >
         {this.props.currentBoard.map((rows, i) =>

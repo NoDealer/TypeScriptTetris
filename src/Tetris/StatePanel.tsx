@@ -1,5 +1,6 @@
 import React, { CSSProperties } from 'react'
 import { Cell } from './Cell'
+import { Tetris } from './Tetris'
 
 type StatePanelProps = {
   linesBurned: number
@@ -17,8 +18,8 @@ export class StatePanel extends React.Component<
   StatePanelState
 > {
   StatePanelStyle: CSSProperties = {
-    width: '20vh',
-    height: '84.3vh', //80vh board + 4vh control panel + 3 borders(0.1)
+    width: `${Tetris.scalingFactor * 5}vh`,
+    height: `${Tetris.scalingFactor * 21 + 0.3}vh`, //20 board + 1 control panel + 3 borders(0.1 each)
     border: 'solid',
     borderLeft: 'none',
     float: 'left',
