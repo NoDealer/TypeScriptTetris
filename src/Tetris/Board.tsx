@@ -1,7 +1,6 @@
 import React from 'react'
 import { Cell } from './Cell'
 import { Figure, Tetramino } from './Element'
-import { Tetris } from './Tetris'
 
 type BoardProps = {
   rowNum: number
@@ -10,6 +9,7 @@ type BoardProps = {
   shape: Tetramino
   figurePosX: number
   figurePosY: number
+  scaleFactor: number
 }
 
 export class Board extends React.Component<BoardProps> {
@@ -19,11 +19,11 @@ export class Board extends React.Component<BoardProps> {
         id="board"
         style={{
           border: 'solid',
-          width: `${Tetris.scalingFactor * this.props.colNum}vh`,
-          height: `${Tetris.scalingFactor * this.props.rowNum}vh`,
+          width: `${this.props.scaleFactor * this.props.colNum}vh`,
+          height: `${this.props.scaleFactor * this.props.rowNum}vh`,
           display: 'grid',
           position: 'relative',
-          gridTemplateColumns: `repeat(${this.props.colNum},${Tetris.scalingFactor}vh)`,
+          gridTemplateColumns: `repeat(${this.props.colNum},${this.props.scaleFactor}vh)`,
         }}
       >
         {this.props.currentBoard.map((rows, i) =>
@@ -39,6 +39,7 @@ export class Board extends React.Component<BoardProps> {
           boardPosX={this.props.figurePosX}
           boardPosY={this.props.figurePosY}
           figure={this.props.shape}
+          scaleFactor={this.props.scaleFactor}
         />
       </div>
     )

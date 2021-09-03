@@ -5,6 +5,7 @@ import { StatePanel } from './StatePanel'
 import { FigureFactory, Tetramino } from './Element'
 
 type TetrisProp = {
+  scalingFactor: number
   cols: number
   rows: number
 }
@@ -31,8 +32,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   startingY = 0
   linesBurnToLevelUp = 10
   maxLevel = 10
-
-  static scalingFactor = 4
 
   CreateDefaultBoard(): string[][] {
     const rows: string[][] = []
@@ -326,6 +325,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             StartGameFunc={this.StartGame}
             PauseGameFunc={this.Pause}
             ResetGameFunc={this.ResetGame}
+            scaleFactor={this.props.scalingFactor}
           />
           <Board
             currentBoard={this.state.board}
@@ -334,6 +334,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             shape={this.state.currentElement}
             rowNum={this.props.rows}
             colNum={this.props.cols}
+            scaleFactor={this.props.scalingFactor}
           />
         </div>
         <StatePanel
@@ -341,6 +342,8 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           score={this.state.score}
           linesBurned={this.state.linesBurned}
           levelCallback={this.GetLevelFromStatePanel}
+          scaleFactor={this.props.scalingFactor}
+          rows={this.props.rows}
         />
       </div>
     )

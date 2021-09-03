@@ -4,12 +4,13 @@ type ControlPanelProps = {
   StartGameFunc: () => void
   PauseGameFunc: () => void
   ResetGameFunc: () => void
+  scaleFactor: number
 }
 
 export class ControlPanel extends React.Component<ControlPanelProps> {
   ControlPanelStyle: CSSProperties = {
-    width: '40vh',
-    height: '4vh',
+    width: `${this.props.scaleFactor * 10}vh`,
+    height: `${this.props.scaleFactor}vh`,
     border: 'solid',
     borderBottom: 'none',
     display: 'flex',

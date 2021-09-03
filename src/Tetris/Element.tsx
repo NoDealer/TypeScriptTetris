@@ -5,6 +5,7 @@ type ElementProps = {
   boardPosX: number
   boardPosY: number
   figure: Tetramino
+  scaleFactor: number
 }
 
 export class Tetramino {
@@ -76,8 +77,8 @@ export class Figure extends React.Component<ElementProps> {
       <div
         style={{
           position: 'absolute',
-          left: `${4 * this.props.boardPosX}vh`,
-          top: `${4 * this.props.boardPosY}vh`,
+          left: `${this.props.scaleFactor * this.props.boardPosX}vh`,
+          top: `${this.props.scaleFactor * this.props.boardPosY}vh`,
           display: 'grid',
           gridTemplateColumns: `repeat(${
             typeof this.props.figure.Shape === 'undefined'
