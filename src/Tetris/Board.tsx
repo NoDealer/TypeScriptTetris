@@ -1,16 +1,15 @@
 import React from 'react'
 import { Cell } from './Cell'
-import { Figure } from './Element'
+import { Figure, Tetramino } from './Element'
 import { Tetris } from './Tetris'
 
 type BoardProps = {
   rowNum: number
   colNum: number
   currentBoard: string[][]
-  shape: string[][]
+  shape: Tetramino
   figurePosX: number
   figurePosY: number
-  gameOver: boolean
 }
 
 export class Board extends React.Component<BoardProps> {
@@ -39,7 +38,7 @@ export class Board extends React.Component<BoardProps> {
         <Figure
           boardPosX={this.props.figurePosX}
           boardPosY={this.props.figurePosY}
-          shape={this.props.shape}
+          figure={this.props.shape}
         />
       </div>
     )

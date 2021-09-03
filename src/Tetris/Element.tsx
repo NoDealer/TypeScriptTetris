@@ -4,44 +4,66 @@ import { Cell } from './Cell'
 type ElementProps = {
   boardPosX: number
   boardPosY: number
-  shape: string[][]
+  figure: Tetramino
+}
+
+export class Tetramino {
+  public Shape: string[][] = []
+
+  static ElementNotExist(element: Tetramino): boolean {
+    return typeof element === 'undefined' || element.Shape.length === 0
+  }
 }
 
 //All tetramino variants
-export const Shapes: string[][][] = [
-  [
-    ['red', 'red'],
-    ['red', 'red'],
-  ],
+export const Shapes: Tetramino[] = [
+  {
+    Shape: [
+      ['red', 'red'],
+      ['red', 'red'],
+    ],
+  },
 
-  [
-    ['white', 'green'],
-    ['green', 'green'],
-    ['white', 'green'],
-  ],
+  {
+    Shape: [
+      ['white', 'green'],
+      ['green', 'green'],
+      ['white', 'green'],
+    ],
+  },
 
-  [
-    ['white', 'blue'],
-    ['blue', 'blue'],
-    ['blue', 'white'],
-  ],
+  {
+    Shape: [
+      ['white', 'blue'],
+      ['blue', 'blue'],
+      ['blue', 'white'],
+    ],
+  },
 
-  [
-    ['white', 'orange', 'orange'],
-    ['orange', 'orange', 'white'],
-  ],
+  {
+    Shape: [
+      ['white', 'orange', 'orange'],
+      ['orange', 'orange', 'white'],
+    ],
+  },
 
-  [['yellow', 'yellow', 'yellow', 'yellow']],
+  {
+    Shape: [['yellow', 'yellow', 'yellow', 'yellow']],
+  },
 
-  [
-    ['pink', 'pink', 'pink'],
-    ['white', 'white', 'pink'],
-  ],
+  {
+    Shape: [
+      ['pink', 'pink', 'pink'],
+      ['white', 'white', 'pink'],
+    ],
+  },
 
-  [
-    ['cyan', 'cyan', 'cyan'],
-    ['cyan', 'white', 'white'],
-  ],
+  {
+    Shape: [
+      ['cyan', 'cyan', 'cyan'],
+      ['cyan', 'white', 'white'],
+    ],
+  },
 ]
 
 export class Figure extends React.Component<ElementProps> {
@@ -58,20 +80,20 @@ export class Figure extends React.Component<ElementProps> {
           top: `${4 * this.props.boardPosY}vh`,
           display: 'grid',
           gridTemplateColumns: `repeat(${
-            typeof this.props.shape == 'undefined'
+            typeof this.props.figure.Shape === 'undefined'
               ? 0
-              : this.props.shape[0].length
+              : this.props.figure.Shape[0].length
           },4vh)`,
         }}
         className={'tetramino'}
       >
-        {typeof this.props.shape !== 'undefined' &&
-          this.props.shape.map((rows, i) =>
+        {typeof this.props.figure !== 'undefined' &&
+          this.props.figure.Shape.map((rows, i) =>
             rows.map((col, j) => (
               <Cell
-                Color={this.props.shape[i][j]}
+                Color={this.props.figure.Shape[i][j]}
                 key={`f${i}+${j}`}
-                Zindex={this.props.shape[i][j] === 'white' ? 0 : 1}
+                Zindex={this.props.figure.Shape[i][j] === 'white' ? 0 : 1}
               />
             ))
           )}
@@ -81,7 +103,7 @@ export class Figure extends React.Component<ElementProps> {
 }
 
 export class FigureFactory {
-  static GetRandomTetramino(): string[][] {
+  static GetRandomTetramino(): Tetramino {
     return Shapes[Math.floor(Math.random() * Shapes.length)]
   }
 }

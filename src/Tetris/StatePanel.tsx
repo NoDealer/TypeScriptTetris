@@ -1,12 +1,13 @@
 import React, { CSSProperties } from 'react'
 import { Cell } from './Cell'
+import { Tetramino } from './Element'
 import { Tetris } from './Tetris'
 
 type StatePanelProps = {
   linesBurned: number
   score: number
   levelCallback: (stage: number) => void
-  nextElem: string[][]
+  nextElem: Tetramino
 }
 
 type StatePanelState = {
@@ -59,7 +60,7 @@ export class StatePanel extends React.Component<
     if (typeof this.props.nextElem == 'undefined') {
       return 0
     } else {
-      return this.props.nextElem[0].length
+      return this.props.nextElem.Shape[0].length
     }
   }
 
@@ -77,10 +78,10 @@ export class StatePanel extends React.Component<
           }}
         >
           {typeof this.props.nextElem !== 'undefined' &&
-            this.props.nextElem.map((rows, i) =>
+            this.props.nextElem.Shape.map((rows, i) =>
               rows.map((col, j) => (
                 <Cell
-                  Color={this.props.nextElem[i][j]}
+                  Color={this.props.nextElem.Shape[i][j]}
                   key={`n${i}+${j}`}
                   Zindex={1}
                 />

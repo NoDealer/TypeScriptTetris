@@ -2,7 +2,7 @@ import React from 'react'
 import { Board } from './Board'
 import { ControlPanel } from './ControlPanel'
 import { StatePanel } from './StatePanel'
-import { FigureFactory } from './Element'
+import { FigureFactory, Tetramino } from './Element'
 
 type TetrisProp = {
   cols: number
@@ -11,8 +11,8 @@ type TetrisProp = {
 
 type TetrisState = {
   board: string[][]
-  currentElement: string[][]
-  nextElement: string[][]
+  currentElement: Tetramino
+  nextElement: Tetramino
   elementPosX: number
   elementPosY: number
   firstMoveSpawn: boolean
@@ -43,8 +43,8 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   }
 
   initialState: TetrisState = {
-    currentElement: [[]],
-    nextElement: [[]],
+    currentElement: { Shape: [[]] },
+    nextElement: { Shape: [[]] },
     elementPosX: 4,
     elementPosY: 0,
     board: this.CreateDefaultBoard(),
@@ -103,10 +103,10 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     setTimeout(this.GameLoop, nextExecTime)
   }
 
-  IsLocationPossible(element: string[][], x: number, y: number): boolean {
-    if (typeof element == 'undefined' || element.length == 0) return false
-    for (let i = 0; i < element.length; i++)
-      for (let j = 0; j < element[i].length; j++) {
+  IsLocationPossible(element: Tetramino, x: number, y: number): boolean {
+    if (Tetramino.ElementNotExist(element)) return false
+    for (let i = 0; i < element.Shape.length; i++)
+      for (let j = 0; j < element.Shape[i].length; j++) {
         //detect border collision
         if (
           i + y + this.state.elementPosY < 0 ||
@@ -118,7 +118,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
         }
         //detect field collision
         if (
-          element[i][j] != 'white' &&
+          element.Shape[i][j] != 'white' &&
           this.state.board[i + y + this.state.elementPosY][
             j + x + this.state.elementPosX
           ] != 'white'
@@ -134,11 +134,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   }
 
   MoveInDirection(x: number, y: number): void {
-    if (
-      typeof this.state.currentElement == 'undefined' ||
-      this.state.currentElement.length == 0
-    )
-      return
+    if (Tetramino.ElementNotExist(this.state.currentElement)) return
     const newX = this.state.elementPosX + x
     const newY = this.state.elementPosY + y
     this.setState({ elementPosX: newX })
@@ -150,25 +146,21 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     this.setState({ currentElement: shape })
   }
 
-  RotateClockwise(array: string[][]): string[][] {
-    const result: string[][] = []
-    array.forEach(function (a, i, aa) {
+  RotateClockwise(tetramino: Tetramino): Tetramino {
+    const result: Tetramino = { Shape: [[]] }
+    tetramino.Shape.forEach(function (a, i, aa) {
       a.forEach(function (b, j) {
-        result[j] = result[j] || []
-        result[j][aa.length - i - 1] = b
+        result.Shape[j] = result.Shape[j] || []
+        result.Shape[j][aa.length - i - 1] = b
       })
     })
     return result
   }
 
-  private ElementExist(element: string[][]): boolean {
-    return typeof element === 'undefined' || element.length === 0
-  }
-
   FixTetramino() {
     this.setState({
       board: this.MergeElementAndBoard(),
-      currentElement: [[]],
+      currentElement: { Shape: [[]] },
     })
     this.ClearFullRows()
     if (
@@ -194,12 +186,12 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
     const newBoard = this.state.board.map(function (arr) {
       return arr.slice()
     })
-    for (let i = 0; i < this.state.currentElement.length; i++)
-      for (let j = 0; j < this.state.currentElement[i].length; j++) {
-        if (this.state.currentElement[i][j] != 'white') {
+    for (let i = 0; i < this.state.currentElement.Shape.length; i++)
+      for (let j = 0; j < this.state.currentElement.Shape[i].length; j++) {
+        if (this.state.currentElement.Shape[i][j] != 'white') {
           newBoard[i + this.state.elementPosY][
             j + this.state.elementPosX
-          ] = this.state.currentElement[i][j]
+          ] = this.state.currentElement.Shape[i][j]
         }
       }
     return newBoard
@@ -212,8 +204,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
   keyPressHandle = (event: KeyboardEvent) => {
     if (
       this.state == null ||
-      typeof this.state.currentElement === 'undefined' ||
-      this.state.currentElement.length == 0
+      Tetramino.ElementNotExist(this.state.currentElement)
     ) {
       return
     }
@@ -260,7 +251,7 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
           const element = this.state.currentElement
           const posY = this.state.elementPosY
           let moveToFall = 0
-          this.setState({ currentElement: [[]] })
+          this.setState({ currentElement: { Shape: [[]] } })
           while (this.IsLocationPossible(element, 0, moveToFall)) {
             moveToFall++
           }
@@ -343,7 +334,6 @@ export class Tetris extends React.Component<TetrisProp, TetrisState> {
             shape={this.state.currentElement}
             rowNum={this.props.rows}
             colNum={this.props.cols}
-            gameOver={this.state.gameOver}
           />
         </div>
         <StatePanel
