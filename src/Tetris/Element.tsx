@@ -1,18 +1,18 @@
-import React from 'react'
-import { Cell } from './Cell'
+import React from 'react';
+import { Cell } from './Cell';
 
 type ElementProps = {
-  boardPosX: number
-  boardPosY: number
-  figure: Tetramino
-  scaleFactor: number
-}
+  boardPosX: number;
+  boardPosY: number;
+  figure: Tetramino;
+  scaleFactor: number;
+};
 
 export class Tetramino {
-  public Shape: string[][] = []
+  public Shape: string[][] = [];
 
   static ElementNotExist(element: Tetramino): boolean {
-    return typeof element === 'undefined' || element.Shape.length === 0
+    return typeof element === 'undefined' || element.Shape.length === 0;
   }
 }
 
@@ -65,14 +65,14 @@ export const Shapes: Tetramino[] = [
       ['cyan', 'white', 'white'],
     ],
   },
-]
+];
 
 export class Figure extends React.Component<ElementProps> {
   constructor(props: ElementProps) {
-    super(props)
+    super(props);
   }
 
-  render() {
+  public render() {
     return (
       <div
         style={{
@@ -99,12 +99,12 @@ export class Figure extends React.Component<ElementProps> {
             ))
           )}
       </div>
-    )
+    );
   }
 }
 
 export class FigureFactory {
   static GetRandomTetramino(): Tetramino {
-    return Shapes[Math.floor(Math.random() * Shapes.length)]
+    return Shapes[Math.floor(Math.random() * Shapes.length)];
   }
 }

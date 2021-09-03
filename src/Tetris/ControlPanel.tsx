@@ -1,11 +1,11 @@
-import React, { CSSProperties } from 'react'
+import React, { CSSProperties } from 'react';
 
 type ControlPanelProps = {
-  StartGameFunc: () => void
-  PauseGameFunc: () => void
-  ResetGameFunc: () => void
-  scaleFactor: number
-}
+  StartGameFunc: () => void;
+  PauseGameFunc: () => void;
+  ResetGameFunc: () => void;
+  scaleFactor: number;
+};
 
 export class ControlPanel extends React.Component<ControlPanelProps> {
   ControlPanelStyle: CSSProperties = {
@@ -14,9 +14,9 @@ export class ControlPanel extends React.Component<ControlPanelProps> {
     border: 'solid',
     borderBottom: 'none',
     display: 'flex',
-  }
+  };
 
-  render() {
+  public render() {
     return (
       <div style={this.ControlPanelStyle}>
         <button style={{ flexGrow: 1 }} onClick={this.props.StartGameFunc}>
@@ -29,6 +29,6 @@ export class ControlPanel extends React.Component<ControlPanelProps> {
           Reset game
         </button>
       </div>
-    )
+    );
   }
 }

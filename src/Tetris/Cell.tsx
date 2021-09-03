@@ -1,9 +1,9 @@
-import React from 'react'
+import React from 'react';
 
 export type CellProps = {
-  Color: string
-  Zindex: number
-}
+  Color: string;
+  Zindex: number;
+};
 
 export class Cell extends React.Component<CellProps> {
   render() {
@@ -17,6 +17,6 @@ export class Cell extends React.Component<CellProps> {
           zIndex: this.props.Zindex,
         }}
       ></div>
-    )
+    );
   }
 }

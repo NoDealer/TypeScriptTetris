@@ -1,16 +1,16 @@
-import React from 'react'
-import { Cell } from './Cell'
-import { Figure, Tetramino } from './Element'
+import React from 'react';
+import { Cell } from './Cell';
+import { Figure, Tetramino } from './Element';
 
 type BoardProps = {
-  rowNum: number
-  colNum: number
-  currentBoard: string[][]
-  shape: Tetramino
-  figurePosX: number
-  figurePosY: number
-  scaleFactor: number
-}
+  rowNum: number;
+  colNum: number;
+  currentBoard: string[][];
+  shape: Tetramino;
+  figurePosX: number;
+  figurePosY: number;
+  scaleFactor: number;
+};
 
 export class Board extends React.Component<BoardProps> {
   render() {
@@ -42,6 +42,6 @@ export class Board extends React.Component<BoardProps> {
           scaleFactor={this.props.scaleFactor}
         />
       </div>
-    )
+    );
   }
 }

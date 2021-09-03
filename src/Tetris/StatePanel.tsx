@@ -1,71 +1,71 @@
-import React, { CSSProperties } from 'react'
-import { Cell } from './Cell'
-import { Tetramino } from './Element'
+import React, { CSSProperties } from 'react';
+import { Cell } from './Cell';
+import { Tetramino } from './Element';
 
 type StatePanelProps = {
-  linesBurned: number
-  score: number
-  levelCallback: (stage: number) => void
-  nextElem: Tetramino
-  scaleFactor: number
-  rows: number
-}
+  linesBurned: number;
+  score: number;
+  levelCallback: (stage: number) => void;
+  nextElem: Tetramino;
+  scaleFactor: number;
+  rows: number;
+};
 
 type StatePanelState = {
-  stage: number
-}
+  stage: number;
+};
 
 export class StatePanel extends React.Component<
   StatePanelProps,
   StatePanelState
 > {
-  StatePanelStyle: CSSProperties = {
+  private StatePanelStyle: CSSProperties = {
     width: `${this.props.scaleFactor * 5}vh`,
     height: `${this.props.scaleFactor * 21 + 0.3}vh`, //20 board + 1 control panel + 3 borders(0.1 each)
     border: 'solid',
     borderLeft: 'none',
     float: 'left',
     position: 'relative',
+  };
+
+  public constructor(props: StatePanelProps) {
+    super(props);
+    this.state = { stage: 1 };
   }
 
-  constructor(props: StatePanelProps) {
-    super(props)
-    this.state = { stage: 1 }
-  }
+  private maxLevel = 10;
 
-  maxLevel = 10
+  private minLevel = 1;
 
-  minLevel = 1
-
-  IncrementLevel = () => {
-    let newLevel = this.state.stage
-    newLevel++
+  private IncrementLevel = () => {
+    let newLevel = this.state.stage;
+    newLevel++;
     if (newLevel > this.maxLevel) {
-      newLevel = this.maxLevel
+      newLevel = this.maxLevel;
     }
-    this.setState({ stage: newLevel })
-    this.props.levelCallback(newLevel)
-  }
+    this.setState({ stage: newLevel });
+    this.props.levelCallback(newLevel);
+  };
 
-  DecrementLevel = () => {
-    let newLevel = this.state.stage
-    newLevel--
+  private DecrementLevel = () => {
+    let newLevel = this.state.stage;
+    newLevel--;
     if (newLevel < this.minLevel) {
-      newLevel = this.minLevel
+      newLevel = this.minLevel;
     }
-    this.setState({ stage: newLevel })
-    this.props.levelCallback(newLevel)
-  }
+    this.setState({ stage: newLevel });
+    this.props.levelCallback(newLevel);
+  };
 
-  GetGridLines = (): number => {
+  private GetGridLines(): number {
     if (typeof this.props.nextElem == 'undefined') {
-      return 0
+      return 0;
     } else {
-      return this.props.nextElem.Shape[0].length
+      return this.props.nextElem.Shape[0].length;
     }
   }
 
-  render() {
+  public render() {
     return (
       <div style={this.StatePanelStyle}>
         <div
@@ -177,6 +177,6 @@ export class StatePanel extends React.Component<
           ></input>
         </div>
       </div>
-    )
+    );
   }
 }
